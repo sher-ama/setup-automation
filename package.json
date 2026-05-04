@@ -1,0 +1,30 @@
+{
+  "name": "setup",
+  "version": "1.0.0",
+  "description": "One-time environment provisioning tool for ICM CUSS Airport platform simulator",
+  "private": true,
+  "scripts": {
+    "setup": "ts-node setupEnv.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.17",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "acorn": "^8.16.0",
+    "acorn-walk": "^8.3.5",
+    "arg": "^4.1.3",
+    "create-require": "^1.1.1",
+    "diff": "^4.0.4",
+    "make-error": "^1.3.6",
+    "undici-types": "^6.21.0",
+    "v8-compile-cache-lib": "^3.0.1",
+    "yn": "^3.1.1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
+}
