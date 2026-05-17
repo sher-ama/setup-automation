@@ -1,0 +1,1 @@
+/**\n * @file setup-ui.ts\n * @description Module for adding UI elements to the setup page.\n *\n * Placeholder for future UI components used during the interactive\n * environment setup flow.\n */

@@ -1,5 +1,5 @@
 {
-  "keywords": ["KIXT1","PERT1","DXBT3","DMET1","BNEI","BNED","WSIT1","FUKT1","NGOT1","IAHI","JFKT4","MUCT1","STRT3","TPET1","CDGT1","NZAKL","WLGTC1","SYDT1","GENTI","NRTT1","NRTT2","NRTT3","NRTT3S","KEF","SYDT1","LHR","SIN","DXN","MEL","ANA"],
+  "keywords": ["KIXT1","PERT1","DXBT3","DMET1","BNEI","BNED","WSIT1","FUKT1","NGOT1","IAHI","JFKT4","MUCT1","STRT3","TPET1","CDGT1","NZAKL","WLGTC1","SYDT1","GENTI","NRTT1","NRTT2","NRTT3","NRTT3S","KEF","SYDT1","LHR","SIN","DXN","MEL","ANA","BOMT2"],
   "registrySuffix": "SIMULATOR",
   "keywordKioskIds": {
     "KIXT1" : "KIX1ABD01",
@@ -30,6 +30,7 @@
     "SIN"   : "SIN1ABD01",
     "DXN"   : "DXN1ABD01",
     "MEL"   : "MEL1ABD01",
-    "ANA"   : "ANA1ABD01"
+    "ANA"   : "ANA1ABD01",
+    "BOMT2" : "BOMABDQA02"
   }
 }

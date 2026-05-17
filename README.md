@@ -49,7 +49,7 @@ npm install
 ## Usage
 
 ```bash
-npm run setup -- --airport=<IATA_CODE> --airline=<AIRLINE_CODE>
+npx ts-node setupEnv.ts --airport=<IATA> --airline=<CODE>
 ```
 
 ### Arguments
@@ -62,7 +62,7 @@ npm run setup -- --airport=<IATA_CODE> --airline=<AIRLINE_CODE>
 ### Example
 
 ```bash
-npm run setup -- --airport=SYD --airline=QF
+npx ts-node setupEnv.ts --airport=PER --airline=QR
 ```
 
 ---
@@ -121,9 +121,9 @@ Config file writes (`ABDMasterConfig.cfg` and `AlAppConfig.json`) happen only af
 
 ### Supported Airports (keywords)
 
-The following airport/PC keywords are pre-configured in `setup.config.json`:
+The following PC keywords are pre-configured in `setup.config.json`:
 
-`KIX`, `PER`, `DXB`, `DME`, `BNE`, `WSI`, `FUK`, `NGO`, `IAH`, `JFK`, `MUC`, `STR`, `TPE`, `CDG`, `AKL`, `WLG`, `SYD`, `GEN`, `NRT`, `KEF`, `LHR`, `SIN`, `DXN`, `MEL`, `ANA`
+`KIXT1`, `PERT1`, `DXBT3`, `DMET1`, `BNEI`, `BNED`, `WSIT1`, `FUKT1`, `NGOT1`, `IAHI`, `JFKT4`, `MUCT1`, `STRT3`, `TPET1`, `CDGT1`, `NZAKL`, `WLGTC1`, `SYDT1`, `GENTI`, `NRTT1`, `NRTT2`, `NRTT3`, `NRTT3S`, `KEF`, `LHR`, `SIN`, `DXN`, `MEL`, `ANA`, `BOMT2`
 
 ---
 

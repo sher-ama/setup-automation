@@ -1,3 +1,24 @@
+/**
+ * @file setupEnv.ts
+ * @description Entry-point script for the Playwright environment setup tool.
+ *
+ * Orchestrates all setup steps for a given airport + airline combination:
+ *   1. Writes the ABD PC name to the Windows registry (requires Administrator).
+ *   2. Updates the DEFAULT `<ABDConfig>` block in ABDMasterConfig.cfg.
+ *   3. Creates or updates the AlAppConfig.json entry and the CussConnector folder.
+ *
+ * Usage:
+ *   npx ts-node setupEnv.ts --airport=<IATA> --airline=<CODE>
+ *
+ * Example:
+ *   npx ts-node setupEnv.ts --airport=WSI --airline=QF
+ *
+ * Prerequisites:
+ *   - Run as Windows Administrator.
+ *   - Populate setup.config.json with keywords and keywordKioskIds.
+ *   - Edit paths.config.ts if any file paths differ from the defaults.
+ */
+
 import * as fs       from 'fs';
 import * as path     from 'path';
 import * as readline from 'readline';
@@ -7,6 +28,13 @@ import { loadABDMasterConfig, computeABDMasterConfigChange, applyABDMasterConfig
 import { loadAlAppConfig, getUsedPorts, computeAlAppConfigChange, applyAlAppConfigChange, applyAlAppConfigCussFolder, saveAlAppConfig, UsedPortInfo } from './updateAlAppConfig';
 
 // ─── Synchronous stdin prompt ─────────────────────────────────────────────────
+/**
+ * Synchronously reads a single line from stdin without requiring readline or
+ * an async event loop.  Used for early prompts before the async IIFE starts.
+ *
+ * @param question - Text to display before waiting for input.
+ * @returns The trimmed input string, or `''` if stdin is unavailable.
+ */
 function prompt(question: string): string {
     process.stdout.write(question);
     const buf = Buffer.alloc(1024);
@@ -23,6 +51,12 @@ function prompt(question: string): string {
 const CONFIG_PATH = path.resolve(__dirname, 'setup.config.json');
 
 // ─── Parse CLI Arguments ─────────────────────────────────────────────────────
+/**
+ * Parses a named `--name=value` argument from the Node.js process argv array.
+ *
+ * @param name - Argument name (without the `--` prefix).
+ * @returns The value string, or `undefined` if the argument is absent.
+ */
 function getArg(name: string): string | undefined {
     const arg = process.argv.find((a) => a.startsWith(`--${name}=`));
     return arg ? arg.split('=')[1] : undefined;
@@ -124,7 +158,7 @@ if (answer.toLowerCase() !== 'y' && answer.toLowerCase() !== 'yes') {
 
     let abdContent  = loadABDMasterConfig();
     const alEntries = loadAlAppConfig();
-    const usedPorts = getUsedPorts(alEntries);
+    const usedPorts = getUsedPorts();
     let abdModified = false;
     let alModified  = false;
 

@@ -1,19 +1,46 @@
-import * as fs from 'fs';
+/**
+ * @file updateConfig.ts
+ * @description Reads, modifies, and saves ABDMasterConfig.cfg for a given
+ *              PC name / airport / airline combination.
+ *
+ * The module follows a pure-compute + explicit-apply pattern:
+ *   1. {@link loadABDMasterConfig}          — read the file into memory
+ *   2. {@link computeABDMasterConfigChange} — diff the relevant XML block (no I/O)
+ *   3. {@link applyABDMasterConfigChange}   — splice the change back into the string
+ *   4. {@link saveABDMasterConfig}          — write the result to disk
+ *
+ * All file paths are sourced from {@link ./paths.config}.
+ */
 
-// ─── Path ─────────────────────────────────────────────────────────────────────
-const ABD_MASTER_CONFIG_PATH =
-    'C:\\Program Files (x86)\\ICM CUSS Platform\\v3.14.0\\ABDMasterConfig.cfg';
+import * as fs from 'fs';
+import { ABD_MASTER_CONFIG_PATH } from './paths.config';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
+
+/**
+ * Describes a pending change to the DEFAULT `<ABDConfig>` block inside
+ * ABDMasterConfig.cfg for a single PC name.
+ */
 export interface ABDMasterConfigChange {
+    /** The fully-qualified PC name the change targets (e.g. `WSIT1SIMULATOR`). */
     pcName           : string;
+    /** Original XML text of the DEFAULT `<ABDConfig>` block, before any edits. */
     originalBlock    : string;
+    /** Updated XML text that should replace `originalBlock`. */
     updatedBlock     : string;
+    /** Character offset in the full file where the DEFAULT `<ABDConfig>` tag starts. */
     firstAbdConfigIdx: number;
+    /** Character offset in the full file immediately after `</ABDConfig>`. */
     firstAbdConfigEnd: number;
 }
 
 // ─── Load ─────────────────────────────────────────────────────────────────────
+/**
+ * Reads ABDMasterConfig.cfg from disk and returns its full contents as a string.
+ *
+ * @returns The raw file contents.
+ * @throws Calls `process.exit(1)` if the file is missing or unreadable.
+ */
 export function loadABDMasterConfig(): string {
     if (!fs.existsSync(ABD_MASTER_CONFIG_PATH)) {
         console.error(`❌ ABDMasterConfig not found at: ${ABD_MASTER_CONFIG_PATH}`);
@@ -28,6 +55,23 @@ export function loadABDMasterConfig(): string {
 }
 
 // ─── Compute (pure — no I/O side-effects) ────────────────────────────────────
+/**
+ * Computes the changes needed to the DEFAULT `<ABDConfig>` XML block for the
+ * given PC name without touching the file system.
+ *
+ * Changes applied:
+ *   - Sets `SupportedAirlines` to `"<airport>,<airline>"`.
+ *   - Replaces `<SharedAppSupport>` content with a single matching entry.
+ *   - Ensures `IsDevEnv="true"` is present on the `<ABDConfig>` element.
+ *   - Ensures `AmadeusKioskBelt="true"` is present on the `<ABDConfig>` element.
+ *
+ * @param content - Full text of ABDMasterConfig.cfg.
+ * @param airport - IATA airport code (e.g. `WSI`).
+ * @param airline - Airline code (e.g. `QF`).
+ * @param pcName  - Fully-qualified PC name (e.g. `WSIT1SIMULATOR`).
+ * @returns A {@link ABDMasterConfigChange} describing the diff, or `null` if no
+ *          changes are needed or the PC name cannot be located.
+ */
 export function computeABDMasterConfigChange(
     content: string,
     airport: string,
@@ -139,6 +183,15 @@ export function computeABDMasterConfigChange(
 }
 
 // ─── Apply ────────────────────────────────────────────────────────────────────
+/**
+ * Splices the updated XML block from `change` back into the full config string
+ * and returns the new file contents.  Pure function — does not write to disk.
+ *
+ * @param content - Current full text of ABDMasterConfig.cfg.
+ * @param change  - A {@link ABDMasterConfigChange} produced by
+ *                  {@link computeABDMasterConfigChange}.
+ * @returns Updated full text with the DEFAULT block replaced.
+ */
 export function applyABDMasterConfigChange(
     content: string,
     change : ABDMasterConfigChange
@@ -151,6 +204,12 @@ export function applyABDMasterConfigChange(
 }
 
 // ─── Save ─────────────────────────────────────────────────────────────────────
+/**
+ * Writes the supplied content string to ABDMasterConfig.cfg on disk.
+ *
+ * @param content - Updated full text to persist.
+ * @throws Calls `process.exit(1)` on write failure.
+ */
 export function saveABDMasterConfig(content: string): void {
     try {
         fs.writeFileSync(ABD_MASTER_CONFIG_PATH, content, 'utf-8');
