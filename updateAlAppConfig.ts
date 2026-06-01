@@ -305,7 +305,7 @@ export async function computeAlAppConfigChange(
 
     // CussConnector folder is named after the airport (e.g. C:/Cussconnector/WSI/)
     const cussFolder  = path.join(CUSS_CONNECTOR_ROOT, airport);
-    const cussServiceFolder = `${cussFolder}/${airport}`.replace(/\\/g, '/');
+    const cussServiceFolder = cussFolder.replace(/\\/g, '/');
     const startAuxApp = `${cussServiceFolder}/StartService.bat install ${port} ${airport}`;
     const stopAuxApp  = `${cussServiceFolder}/StopService.bat Stop ${airport}`;
 

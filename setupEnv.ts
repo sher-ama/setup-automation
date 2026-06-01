@@ -3,9 +3,12 @@
  * @description Entry-point script for the Playwright environment setup tool.
  *
  * Orchestrates all setup steps for a given airport + airline combination:
+ *   0. Resolves target PC name from setup.config.json (interactive selection if needed).
  *   1. Writes the ABD PC name to the Windows registry (requires Administrator).
+ *   1.5 Deletes ABDLocalConfig.cfg from the CUSS platform path (if present).
  *   2. Updates the DEFAULT `<ABDConfig>` block in ABDMasterConfig.cfg.
  *   3. Creates or updates the AlAppConfig.json entry and the CussConnector folder.
+ *   4. Saves changed files only after operator confirmation.
  *
  * Usage:
  *   npx ts-node setupEnv.ts --airport=<IATA> --airline=<CODE>
@@ -23,6 +26,7 @@ import * as fs       from 'fs';
 import * as path     from 'path';
 import * as readline from 'readline';
 import * as os from 'os';
+import { ABD_LOCAL_CONFIG_PATH } from './paths.config';
 import { setRegistryValue, isAdminPrivilege } from './setRegistryValue';
 import { loadABDMasterConfig, computeABDMasterConfigChange, applyABDMasterConfigChange, saveABDMasterConfig } from './updateConfig';
 import { loadAlAppConfig, getUsedPorts, computeAlAppConfigChange, applyAlAppConfigChange, applyAlAppConfigCussFolder, saveAlAppConfig, UsedPortInfo } from './updateAlAppConfig';
@@ -50,7 +54,8 @@ function prompt(question: string): string {
 // ─── Config file path ────────────────────────────────────────────────────────
 const CONFIG_PATH = path.resolve(__dirname, 'setup.config.json');
 
-// ─── Parse CLI Arguments ─────────────────────────────────────────────────────
+// ─── Step 0: Resolve PC name context (via CLI args + setup.config.json) ─────
+// Parse CLI Arguments
 /**
  * Parses a named `--name=value` argument from the Node.js process argv array.
  *
@@ -111,7 +116,7 @@ console.log(`   PCNames  : ${keywords.map(k => `${k.toUpperCase()}${suffix}`).jo
 console.log('==========================================');
 console.log('');
 
-// ─── If multiple PCNames, ask user which one to use ───────────────────────────
+// ─── Step 0 (interactive): If multiple PCNames, ask user which one to use ───
 if (keywords.length > 1) {
     console.log('⚠️  Multiple PC names found. Please select one:');
     keywords.forEach((k, i) => {
@@ -136,7 +141,7 @@ for (const keyword of keywords) {
     setRegistryValue(pcName);
 }
 
-// ─── Confirm before proceeding ────────────────────────────────────────────────
+// ─── Confirmation gate: continue to Step 1.5/2/3 only if approved ───────────
 console.log('');
 const answer = prompt('⚠️  Registry updated. Do you want to continue with further steps? (y/n): ');
 if (answer.toLowerCase() !== 'y' && answer.toLowerCase() !== 'yes') {
@@ -146,9 +151,24 @@ if (answer.toLowerCase() !== 'y' && answer.toLowerCase() !== 'yes') {
     process.exit(0);
 }
 
-// ─── Steps 2 & 3: per-pcName combined diff ───────────────────────────────────
+// ─── Steps 1.5, 2 & 3: per-pcName combined diff/apply flow ───────────────────
 (async () => {
     const sep = '─'.repeat(60);
+
+    // Step 1.5 — Local config cleanup
+    // Delete ABDLocalConfig.cfg in CUSS platform root before applying config updates.
+    if (fs.existsSync(ABD_LOCAL_CONFIG_PATH)) {
+        try {
+            fs.unlinkSync(ABD_LOCAL_CONFIG_PATH);
+            console.log(`🧹 Deleted ABDLocalConfig: ${ABD_LOCAL_CONFIG_PATH}`);
+        } catch (error: any) {
+            console.error(`❌ Failed to delete ABDLocalConfig at: ${ABD_LOCAL_CONFIG_PATH}`);
+            console.error(`   Error: ${error?.message ?? error}`);
+            process.exit(1);
+        }
+    } else {
+        console.log(`ℹ️  ABDLocalConfig not found (nothing to delete): ${ABD_LOCAL_CONFIG_PATH}`);
+    }
 
     // Async readline prompt helper
     const rlPrompt = (q: string) => new Promise<string>(res => {
@@ -240,11 +260,13 @@ if (answer.toLowerCase() !== 'y' && answer.toLowerCase() !== 'yes') {
 
         // ── Apply ─────────────────────────────────────────────────────────────
         if (abdChange) {
+            // Step 2 — ABDMasterConfig.cfg update (staged in-memory)
             abdContent  = applyABDMasterConfigChange(abdContent, abdChange);
             abdModified = true;
             console.log(`   ✅ ABDMasterConfig change staged for ${pcName}.`);
         }
         if (alChange) {
+            // Step 3 — AlAppConfig.json update + CussConnector folder provisioning
             console.log(`   🔧 Applying AlAppConfig change for ${pcName} (entryIndex=${alChange.entryIndex})...`);
             applyAlAppConfigChange(alEntries, alChange);
             applyAlAppConfigCussFolder(alChange);
@@ -257,7 +279,7 @@ if (answer.toLowerCase() !== 'y' && answer.toLowerCase() !== 'yes') {
         }
     }
 
-    // ── Save files ────────────────────────────────────────────────────────────
+    // ── Final save: persist only files with staged changes ────────────────────
     console.log(`\n💾 abdModified=${abdModified}  alModified=${alModified}`);
 
     if (abdModified) saveABDMasterConfig(abdContent);

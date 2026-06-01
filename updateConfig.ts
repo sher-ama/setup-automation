@@ -13,7 +13,7 @@
  */
 
 import * as fs from 'fs';
-import { ABD_MASTER_CONFIG_PATH } from './paths.config';
+import { ABD_MASTER_CONFIG_ARCHIVE_PATH, ABD_MASTER_CONFIG_PATH } from './paths.config';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -43,8 +43,18 @@ export interface ABDMasterConfigChange {
  */
 export function loadABDMasterConfig(): string {
     if (!fs.existsSync(ABD_MASTER_CONFIG_PATH)) {
-        console.error(`❌ ABDMasterConfig not found at: ${ABD_MASTER_CONFIG_PATH}`);
-        process.exit(1);
+        if (!fs.existsSync(ABD_MASTER_CONFIG_ARCHIVE_PATH)) {
+            console.error(`❌ ABDMasterConfig not found at: ${ABD_MASTER_CONFIG_PATH}`);
+            console.error(`❌ Archive fallback not found at: ${ABD_MASTER_CONFIG_ARCHIVE_PATH}`);
+            process.exit(1);
+        }
+        try {
+            fs.copyFileSync(ABD_MASTER_CONFIG_ARCHIVE_PATH, ABD_MASTER_CONFIG_PATH);
+            console.log(`   📦 Restored ABDMasterConfig from Archive: ${ABD_MASTER_CONFIG_ARCHIVE_PATH}`);
+        } catch (error) {
+            console.error(`❌ Failed to restore ABDMasterConfig from Archive:`, error);
+            process.exit(1);
+        }
     }
     try {
         return fs.readFileSync(ABD_MASTER_CONFIG_PATH, 'utf-8');

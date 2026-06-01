@@ -33,6 +33,9 @@ export const DEFAULT_BASE_URL = 'https://dev.stg.icm.aero';
 // =============================================================================
 
 export const ABD_MASTER_CONFIG_PATH    = path.join(CUSS_PLATFORM_PATH, 'ABDMasterConfig.cfg');
+export const ABD_LOCAL_CONFIG_PATH     = path.join(CUSS_PLATFORM_PATH, 'ABDLocalConfig.cfg');
+export const CUSS_PLATFORM_ARCHIVE_PATH = path.join(CUSS_PLATFORM_PATH, 'Archive');
+export const ABD_MASTER_CONFIG_ARCHIVE_PATH = path.join(CUSS_PLATFORM_ARCHIVE_PATH, 'ABDMasterConfig.cfg');
 export const AL_APP_CONFIG_PATH        = path.join(CUSS_PLATFORM_PATH, 'AlAppConfig.json');
 export const CUSS_CONNECTOR_TEMPLATE   = path.join(CUSS_CONNECTOR_ROOT, CUSS_CONNECTOR_TEMPLATE_FOLDER);
 
