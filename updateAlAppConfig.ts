@@ -28,6 +28,7 @@ import {
     AL_APP_CONFIG_PATH,
     CUSS_CONNECTOR_ROOT,
     CUSS_CONNECTOR_TEMPLATE,
+    CUSS_USERS_ROOT,
     CHROME_EXE,
     CHROME_FLAGS,
     DEFAULT_BASE_URL,
@@ -298,13 +299,15 @@ export async function computeAlAppConfigChange(
 
     // Build PathOrURL
     const appUrl      = `${baseUrl}/AirBagDropAppWebServer/AirBagDropAppWebServerService/AirlineApp/${airport}/${airport}/${terminalTag}/${kioskId}?cussConnectorPort=${port}`;
-    const userDataDir = `--user-data-dir"C:\\CUSSUsers\\${airport}\\Local\\Google\\Chrome\\User Data"`;
+    const userDataDirPath = `${CUSS_USERS_ROOT}\\${airport}\\Local\\Google\\Chrome\\User Data`;
+    const userDataDir = `--user-data-dir"${userDataDirPath}"`;
     const pathOrURL   = `${CHROME_EXE} ${CHROME_FLAGS} ${userDataDir} ${appUrl}`;
 
     // CussConnector folder is named after the airport (e.g. C:/Cussconnector/WSI/)
     const cussFolder  = path.join(CUSS_CONNECTOR_ROOT, airport);
-    const startAuxApp = `C:/Cussconnector/${airport}/StartService.bat install ${port} ${airport}`;
-    const stopAuxApp  = `C:/Cussconnector/${airport}/StopService.bat Stop ${airport}`;
+    const cussServiceFolder = `${cussFolder}/${airport}`.replace(/\\/g, '/');
+    const startAuxApp = `${cussServiceFolder}/StartService.bat install ${port} ${airport}`;
+    const stopAuxApp  = `${cussServiceFolder}/StopService.bat Stop ${airport}`;
 
     const newEntry = {
         AirlineID           : airport,  // AirlineID = airport code (e.g. WSI, MUC)

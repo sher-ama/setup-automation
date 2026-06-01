@@ -15,6 +15,9 @@ export const CUSS_PLATFORM_PATH = 'C:\\Program Files (x86)\\ICM CUSS Platform\\v
 /** Root folder that holds one sub-folder per airport (e.g. C:\Cussconnector\WSI). */
 export const CUSS_CONNECTOR_ROOT = 'C:\\Cussconnector';
 
+/** Root folder for CUSS user profiles (e.g. C:\CUSSUsers\WSI\Local\Google\Chrome\User Data). */
+export const CUSS_USERS_ROOT = 'C:\\CUSSUsers';
+
 /** Name of the template folder inside CUSS_CONNECTOR_ROOT used to create new airport folders. */
 export const CUSS_CONNECTOR_TEMPLATE_FOLDER = 'Airline1 - Copy';
 
