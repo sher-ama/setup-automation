@@ -66,8 +66,7 @@ export const CHROME_FLAGS =
     ' --overscroll-history-navigation=0' +
     ' --enable-npapi' +
     ' --disable-gpu' +
-    ' --no-sandbox' +
-    ' --user-data-dir';
+    ' --no-sandbox';
 
 export const ABD_REGISTRY_PATH =
     'HKLM\\SOFTWARE\\WOW6432Node\\ICM Airport Technics Australia Pty. Ltd.\\ABD';

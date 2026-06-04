@@ -300,7 +300,7 @@ export async function computeAlAppConfigChange(
     // Build PathOrURL
     const appUrl      = `${baseUrl}/AirBagDropAppWebServer/AirBagDropAppWebServerService/AirlineApp/${airport}/${airport}/${terminalTag}/${kioskId}?cussConnectorPort=${port}`;
     const userDataDirPath = `${CUSS_USERS_ROOT}\\${airport}\\Local\\Google\\Chrome\\User Data`;
-    const userDataDir = `--user-data-dir"${userDataDirPath}"`;
+    const userDataDir = `--user-data-dir="${userDataDirPath}"`;
     const pathOrURL   = `${CHROME_EXE} ${CHROME_FLAGS} ${userDataDir} ${appUrl}`;
 
     // CussConnector folder is named after the airport (e.g. C:/Cussconnector/WSI/)
