@@ -14,7 +14,7 @@ This tool replaces that entire manual process with a single CLI command. It auto
 
 1. **Windows Registry Editor** — Directly writes the `ABDPCName` registry value under the ICM ABD key, which tells the CUSS platform which simulator PC it is running on. Eliminates the need to manually open `regedit`, navigate to the key, and edit the value.
 
-2. **ABDMasterConfig.cfg** — Ensures `ABDMasterConfig.cfg` exists (restores it from `C:\Program Files (x86)\ICM CUSS Platform\v3.14.0\Archive\ABDMasterConfig.cfg` if missing), then locates the `DEFAULT` `<ABDConfig>` block for the target PC and automatically updates:
+2. **ABDMasterConfig.cfg** — Ensures `ABDMasterConfig.cfg` exists (restores it from `C:\Program Files (x86)\ICM CUSS Platform\v3.15.0\Archive\ABDMasterConfig.cfg` if missing), then locates the `DEFAULT` `<ABDConfig>` block for the target PC and automatically updates:
    - `SupportedAirlines` attribute to `<AIRPORT>,<AIRLINE>`
    - The `<SharedAppSupport>` block to reflect the correct airline/airport pairing
    
@@ -33,7 +33,7 @@ This tool replaces that entire manual process with a single CLI command. It auto
 | **OS** | Windows (registry writes required) |
 | **Privileges** | Must be run **as Administrator** |
 | **Node.js** | v18 or later |
-| **ICM CUSS Platform** | Installed at `C:\Program Files (x86)\ICM CUSS Platform\v3.14.0\` |
+| **ICM CUSS Platform** | Installed at `C:\Program Files (x86)\ICM CUSS Platform\v3.15.0\` |
 | **CussConnector template** | Present at `C:\Cussconnector\Airline1 - Copy\` |
 
 ---
@@ -85,7 +85,7 @@ HKLM\SOFTWARE\WOW6432Node\ICM Airport Technics Australia Pty. Ltd.\ABD
 After the registry write you are shown a confirmation prompt — you can stop here if you only need the registry updated.
 
 ### Step 1.5 — Local config cleanup
-Before config updates, the tool deletes `ABDLocalConfig.cfg` from the CUSS platform folder (`C:\Program Files (x86)\ICM CUSS Platform\v3.14.0\ABDLocalConfig.cfg`) if present.
+Before config updates, the tool deletes `ABDLocalConfig.cfg` from the CUSS platform folder (`C:\Program Files (x86)\ICM CUSS Platform\v3.15.0\ABDLocalConfig.cfg`) if present.
 
 ### Step 2 — ABDMasterConfig.cfg update
 For the resolved PC name the tool:

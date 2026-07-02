@@ -73,7 +73,7 @@ export function loadABDMasterConfig(): string {
  *   - Sets `SupportedAirlines` to `"<airport>,<airline>"`.
  *   - Replaces `<SharedAppSupport>` content with a single matching entry.
  *   - Ensures `IsDevEnv="true"` is present on the `<ABDConfig>` element.
- *   - Ensures `AmadeusKioskBelt="true"` is present on the `<ABDConfig>` element.
+ *   - Ensures `AmadeusKioskBelt` is set: appends the airline to a comma-separated string value, or keeps `"true"` as-is.
  *
  * @param content - Full text of ABDMasterConfig.cfg.
  * @param airport - IATA airport code (e.g. `WSI`).
@@ -170,18 +170,31 @@ export function computeABDMasterConfigChange(
         changed = true;
     }
 
-    // ── Ensure AmadeusKioskBelt="true" is present ────────────────────────────
-    if (!/AmadeusKioskBelt="/.test(defaultBlock)) {
+    // ── Ensure AmadeusKioskBelt is set ───────────────────────────────────────
+    const kioskBeltMatch = defaultBlock.match(/AmadeusKioskBelt="([^"]*)"/); 
+    if (!kioskBeltMatch) {
         defaultBlock = defaultBlock.replace(
             /(<ABDConfig\b[^>]*?)(\/?>)/,
             `$1 AmadeusKioskBelt="true"$2`
         );
         console.log(`   ➕ Added AmadeusKioskBelt="true" to DEFAULT block for ${pcName}.`);
         changed = true;
-    } else if (/AmadeusKioskBelt="true"/.test(defaultBlock)) {
+    } else if (kioskBeltMatch[1] === 'true') {
         console.log(`   ✅ AmadeusKioskBelt="true" already present for ${pcName}.`);
     } else {
-        console.log(`   ⚠️  AmadeusKioskBelt attribute found but is NOT "true" for ${pcName} — left unchanged.`);
+        // Value is a comma-separated string of airline codes
+        const kioskBeltCodes = kioskBeltMatch[1].split(',').map(s => s.trim());
+        if (kioskBeltCodes.includes(airline)) {
+            console.log(`   ✅ AmadeusKioskBelt already contains "${airline}" for ${pcName}.`);
+        } else {
+            const newValue = `${kioskBeltMatch[1]},${airline}`;
+            defaultBlock = defaultBlock.replace(
+                /AmadeusKioskBelt="[^"]*"/,
+                `AmadeusKioskBelt="${newValue}"`
+            );
+            console.log(`   ✏️  Appended "${airline}" to AmadeusKioskBelt for ${pcName}.`);
+            changed = true;
+        }
     }
 
     if (!changed) {

@@ -2,7 +2,7 @@
   "keywords": ["KIXT1","PERT1","DXBT3","DMET1","BNEI","BNED","WSIT1","FUKT1","NGOT1","IAHI","JFKT4","MUCT1","STRT3","TPET1","CDGT1","NZAKL","WLGTC1","SYDT1","GENTI","NRTT1","NRTT2","NRTT3","NRTT3S","KEF","SYDT1","LHR","SIN","DXN","MEL","ANA","BOMT2"],
   "registrySuffix": "SIMULATOR",
   "keywordKioskIds": {
-    "KIXT1" : "KIX1ABD01",
+    "KIXT1" : "KIXATABDQA04",
     "PERT1" : "PERT1ABD34",
     "DXBT3" : "DXNABDQA01",
     "DMET1" : "DME1ABD01",
