@@ -10,7 +10,7 @@ import * as path from 'path';
 // =============================================================================
 
 /** ICM CUSS Platform installation folder (update when the version changes). */
-export const CUSS_PLATFORM_PATH = 'C:\\Program Files (x86)\\ICM CUSS Platform\\v3.15.0';
+export const CUSS_PLATFORM_PATH = 'C:\\Program Files (x86)\\ICM CUSS Platform\\v3.14.0';
 
 /** Root folder that holds one sub-folder per airport (e.g. C:\Cussconnector\WSI). */
 export const CUSS_CONNECTOR_ROOT = 'C:\\Cussconnector';
@@ -25,7 +25,8 @@ export const CUSS_CONNECTOR_TEMPLATE_FOLDER = 'Airline1 - Copy';
 export const CHROME_EXE = 'C:\\cussusers\\Chrome-bin119\\chrome.exe';
 
 /** Default base URL for the AirBagDrop application. */
-export const DEFAULT_BASE_URL = 'https://stg9.stg.icm.aero';
+export const DEFAULT_BASE_URL = 'https://dev.stg.icm.aero';
+
 
 // =============================================================================
 // 🔒  DO NOT EDIT — derived from the values above
