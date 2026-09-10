@@ -127,7 +127,7 @@ Config file writes (`ABDMasterConfig.cfg` and `AlAppConfig.json`) happen only af
 
 The following PC keywords are pre-configured in `setup.config.json`:
 
-`KIXT1`, `PERT1`, `DXBT3`, `DMET1`, `BNEI`, `BNED`, `WSIT1`, `FUKT1`, `NGOT1`, `IAHI`, `JFKT4`, `MUCT1`, `STRT3`, `TPET1`, `CDGT1`, `NZAKL`, `WLGTC1`, `SYDT1`, `GENTI`, `NRTT1`, `NRTT2`, `NRTT3`, `NRTT3S`, `KEF`, `LHR`, `SIN`, `DXN`, `MEL`, `ANA`, `BOMT2`
+`KIXT1`, `PERT1`, `DXBT3`, `DMET1`, `BNEI`, `BNED`, `WSIT1`, `FUKTI`, `NGOT1`, `IAHI`, `JFKT4`, `MUCT1`, `STRT3`, `TPET1`, `CDGT1`, `NZAKL`, `WLGTC1`, `SYDT1`, `GENTI`, `NRTT1`, `NRTT2`, `NRTT3`, `NRTT3S`, `KEF`, `LHR`, `SIN`, `DXN`, `MEL`, `ANA`, `BOMT2`
 
 ---
 

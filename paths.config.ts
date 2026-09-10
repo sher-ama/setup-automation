@@ -10,7 +10,7 @@ import * as path from 'path';
 // =============================================================================
 
 /** ICM CUSS Platform installation folder (update when the version changes). */
-export const CUSS_PLATFORM_PATH = 'C:\\Program Files (x86)\\ICM CUSS Platform\\v3.14.0';
+export const CUSS_PLATFORM_PATH = 'C:\\Program Files (x86)\\ICM CUSS Platform\\v3.15.0';
 
 /** Root folder that holds one sub-folder per airport (e.g. C:\Cussconnector\WSI). */
 export const CUSS_CONNECTOR_ROOT = 'C:\\Cussconnector';
