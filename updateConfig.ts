@@ -70,8 +70,8 @@ export function loadABDMasterConfig(): string {
  * given PC name without touching the file system.
  *
  * Changes applied:
- *   - Sets `SupportedAirlines` to `"<airport>,<airline>"`.
- *   - Replaces `<SharedAppSupport>` content with a single matching entry.
+ *   - Preserves the existing `SupportedAirlines` list and appends the new airline.
+ *   - Preserves existing `<SharedAppSupport>` entries and appends the new entry.
  *   - Ensures `IsDevEnv="true"` is present on the `<ABDConfig>` element.
  *   - Ensures `AmadeusKioskBelt` is set: appends the airline to a comma-separated string value, or keeps `"true"` as-is.
  *
@@ -125,32 +125,41 @@ export function computeABDMasterConfigChange(
         return null;
     }
 
-    const expectedSupportedAirlines = `${airport},${airline}`;
-    if (supportedMatch[1] === expectedSupportedAirlines) {
-        console.log(`   ✅ SupportedAirlines already set to "${expectedSupportedAirlines}" for ${pcName}.`);
+    const existingAirlines = supportedMatch[1]
+        .split(',')
+        .map(value => value.trim())
+        .filter(Boolean);
+    const hasAirline = existingAirlines.includes(airline);
+    const updatedSupportedAirlines = hasAirline
+        ? supportedMatch[1]
+        : `${supportedMatch[1]},${airline}`;
+
+    if (hasAirline) {
+        console.log(`   ✅ SupportedAirlines already contains "${airline}" for ${pcName}.`);
     } else {
         defaultBlock = defaultBlock.replace(
             /SupportedAirlines="[^"]*"/,
-            `SupportedAirlines="${expectedSupportedAirlines}"`
+            `SupportedAirlines="${updatedSupportedAirlines}"`
         );
 
-        // Replace the entire content inside <SharedAppSupport> with a single airline entry
+        // Preserve existing entries and append the new airline when it is absent.
         const sharedAppMatch = defaultBlock.match(/<SharedAppSupport>([\s\S]*?)<\/SharedAppSupport>/);
         if (sharedAppMatch) {
-            const existingEntryMatch = sharedAppMatch[1].match(/^([ \t]*)<Airline /m);
-            const entryIndent = existingEntryMatch ? existingEntryMatch[1] : '              ';
-            const closingTagMatch = defaultBlock.match(/([ \t]*)<\/SharedAppSupport>/);
-            const closingIndent = closingTagMatch ? closingTagMatch[1] : '            ';
-            const newAirlineEntry = `${entryIndent}<Airline Name="${airline}" SharedAirline="${airport}" />`;
-            defaultBlock = defaultBlock.replace(
-                /<SharedAppSupport>[\s\S]*?<\/SharedAppSupport>/,
-                `<SharedAppSupport>\n${newAirlineEntry}\n${closingIndent}</SharedAppSupport>`
-            );
+            const hasSharedAppEntry = new RegExp(`<Airline\\s+Name="${airline}"\\b`).test(sharedAppMatch[1]);
+            if (!hasSharedAppEntry) {
+                const existingEntryMatch = sharedAppMatch[1].match(/^([ \t]*)<Airline /m);
+                const entryIndent = existingEntryMatch ? existingEntryMatch[1] : '              ';
+                const newAirlineEntry = `${entryIndent}<Airline Name="${airline}" SharedAirline="${airport}" />`;
+                defaultBlock = defaultBlock.replace(
+                    /([ \t]*)<\/SharedAppSupport>/,
+                    `${newAirlineEntry}\n$1</SharedAppSupport>`
+                );
+            }
         } else {
             console.warn(`⚠️  <SharedAppSupport> block not found in DEFAULT block for ${pcName}. SupportedAirlines was updated but SharedAppSupport was not modified.`);
         }
 
-        console.log(`   ✏️  Set SupportedAirlines="${expectedSupportedAirlines}" and updated SharedAppSupport for ${pcName}.`);
+        console.log(`   ✏️  Preserved existing airlines and appended "${airline}" for ${pcName}.`);
         changed = true;
     }
 

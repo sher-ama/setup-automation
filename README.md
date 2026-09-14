@@ -65,6 +65,8 @@ npx ts-node setupEnv.ts --airport=<IATA> --airline=<CODE>
 npx ts-node setupEnv.ts --airport=PER --airline=QR
 ```
 
+Set `SIMULATOR_PATH` in `paths.config.ts` to the simulator executable. The tool starts the simulator with Administrator privileges if it is not already running.
+
 ---
 
 ## What Happens at Runtime
@@ -111,6 +113,8 @@ After confirming the config changes the tool checks whether the airport's `CussC
 ### Final save
 Config file writes (`ABDMasterConfig.cfg` and `AlAppConfig.json`) happen only after all per-PC confirmations are accepted. If a file required no changes it is not touched.
 
+After saving, the tool launches `CussPlatform.Launcher.exe` with Administrator privileges. On the first launch it checks whether `ABDLocalConfig.cfg` was created, launches the platform again, and then prints `Happy Testing!`.
+
 ---
 
 ## Configuration
@@ -122,6 +126,8 @@ Config file writes (`ABDMasterConfig.cfg` and `AlAppConfig.json`) happen only af
 | `keywords` | `string[]` | List of simulator PC keyword identifiers |
 | `registrySuffix` | `string` | Suffix appended to each keyword to form a PC name (default: `"SIMULATOR"`) |
 | `keywordKioskIds` | `Record<string, string>` | Maps each keyword to its default kiosk ID written into `AlAppConfig.json` |
+
+The simulator executable path is configured as `SIMULATOR_PATH` in `paths.config.ts`.
 
 ### Supported Airports (keywords)
 
