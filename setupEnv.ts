@@ -253,7 +253,7 @@ if (answer.toLowerCase() !== 'y' && answer.toLowerCase() !== 'yes') {
 
         // ── Single confirmation prompt ────────────────────────────────────────
         const confirm = await rlPrompt(`\nProceed with all changes for ${pcName}? (y to confirm): `);
-        if (confirm.trim() !== 'y') {
+        if (confirm.trim().toLowerCase() !== 'y') {
             console.log(`⏭️  Skipping ${pcName}.`);
             continue;
         }
