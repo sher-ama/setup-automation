@@ -214,6 +214,71 @@ export function computeABDMasterConfigChange(
     return { pcName, originalBlock, updatedBlock: defaultBlock, firstAbdConfigIdx, firstAbdConfigEnd };
 }
 
+export function computeABDAccessibilityChange(
+    content: string,
+    pcName: string = 'ABD-DEFAULT'
+): ABDMasterConfigChange | null {
+    const addMissing = pcName === 'ABD-DEFAULT';
+    const openingTag = Array.from(content.matchAll(/<ABDConfig\b[^>]*\bComputerName\s*=\s*(["'])(.*?)\1[^>]*>/g))
+        .find(match => match[2] === pcName);
+    if (!openingTag) {
+        if (!addMissing) return null;
+        throw new Error('Cannot enable accessibility: ABD-DEFAULT block was not found.');
+    }
+    if (!addMissing && openingTag[0].endsWith('/>')) return null;
+    const firstAbdConfigIdx = openingTag.index;
+    const closingIdx = content.indexOf('</ABDConfig>', firstAbdConfigIdx);
+    if (openingTag[0].endsWith('/>') || closingIdx === -1) {
+        throw new Error(`Cannot enable accessibility: ${pcName} block requires a closing </ABDConfig>.`);
+    }
+    const firstAbdConfigEnd = closingIdx + '</ABDConfig>'.length;
+    const originalBlock = content.substring(firstAbdConfigIdx, firstAbdConfigEnd);
+    let defaultBlock = originalBlock;
+    let changed = false;
+    const settings: Record<string, Record<string, string>> = {
+        TextToSpeech: {
+            Disable: 'false', VolumeLevel: '50', VoiceGenderDeviceHelp: 'female', SpeechRate: '0',
+        },
+        NavigationPad: {
+            Disable: 'false', NavigationPadModel: 'Navbar', UseDeviceSimulator: 'true',
+            IsDedicatedtoAccessible: 'true',
+        },
+    };
+    for (const [elementName, attributes] of Object.entries(settings)) {
+        const elementPattern = new RegExp(`<${elementName}\\b[^>]*>`);
+        const existingElement = defaultBlock.match(elementPattern);
+        if (existingElement) {
+            let updatedElement = existingElement[0];
+            for (const [attributeName, value] of Object.entries(attributes)) {
+                const attributePattern = new RegExp(`(\\s${attributeName}\\s*=\\s*)(["'])[^"']*\\2`);
+                updatedElement = attributePattern.test(updatedElement)
+                    ? updatedElement.replace(attributePattern, `$1"${value}"`)
+                    : updatedElement.replace(/(\s*\/?>)$/, ` ${attributeName}="${value}"$1`);
+            }
+            if (updatedElement !== existingElement[0]) {
+                defaultBlock = defaultBlock.replace(elementPattern, () => updatedElement);
+                changed = true;
+            }
+        } else if (addMissing) {
+            const newElement = `<${elementName} ${Object.entries(attributes)
+                .map(([attributeName, value]) => `${attributeName}="${value}"`).join(' ')} />`;
+            const closingIndent = defaultBlock.match(/(?:\r?\n)([ \t]*)<\/ABDConfig>/)?.[1] ?? '';
+            const newline = defaultBlock.includes('\r\n') ? '\r\n' : '\n';
+            defaultBlock = defaultBlock.replace(
+                /[ \t]*<\/ABDConfig>/,
+                `${closingIndent}  ${newElement}${newline}${closingIndent}</ABDConfig>`
+            );
+            changed = true;
+        }
+    }
+    if (!changed) {
+        console.log(`   ℹ️  Accessibility block for ${pcName} requires no changes.`);
+        return null;
+    }
+
+    return { pcName, originalBlock, updatedBlock: defaultBlock, firstAbdConfigIdx, firstAbdConfigEnd };
+}
+
 // ─── Apply ────────────────────────────────────────────────────────────────────
 /**
  * Splices the updated XML block from `change` back into the full config string

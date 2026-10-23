@@ -28,7 +28,7 @@ import * as readline from 'readline';
 import * as os from 'os';
 import { ABD_LOCAL_CONFIG_PATH } from './paths.config';
 import { setRegistryValue, isAdminPrivilege } from './setRegistryValue';
-import { loadABDMasterConfig, computeABDMasterConfigChange, applyABDMasterConfigChange, saveABDMasterConfig } from './updateConfig';
+import { loadABDMasterConfig, computeABDMasterConfigChange, computeABDAccessibilityChange, applyABDMasterConfigChange, saveABDMasterConfig, ABDMasterConfigChange } from './updateConfig';
 import { loadAlAppConfig, getUsedPorts, computeAlAppConfigChange, applyAlAppConfigChange, applyAlAppConfigCussFolder, saveAlAppConfig, UsedPortInfo } from './updateAlAppConfig';
 
 // ─── Synchronous stdin prompt ─────────────────────────────────────────────────
@@ -69,11 +69,17 @@ function getArg(name: string): string | undefined {
 
 const airport = getArg('airport');
 const airline = getArg('airline');
+const accessibilityArg = getArg('accessibility');
+if (accessibilityArg !== undefined && accessibilityArg !== 'true' && accessibilityArg !== 'false') {
+    console.error('Invalid --accessibility value. Use --accessibility=true or --accessibility=false.');
+    process.exit(1);
+}
+const accessibility = accessibilityArg === 'true';
 
 // ─── Validate CLI Arguments ───────────────────────────────────────────────────
 if (!airport || !airline) {
     console.error('❌ Missing required arguments.');
-    console.error('   Usage: ts-node setupEnv.ts --airport=SYD --airline=QF');
+    console.error('   Usage: ts-node setupEnv.ts [--accessibility=true] --airport=SYD --airline=QF');
     process.exit(1);
 }
 
@@ -187,16 +193,18 @@ if (answer.toLowerCase() !== 'y' && answer.toLowerCase() !== 'yes') {
         console.log(`\n🔍 Processing: ${pcName}`);
 
         // ── Compute changes for both files ────────────────────────────────────
-        const abdChange = computeABDMasterConfigChange(
-            abdContent, airport.toUpperCase(), airline.toUpperCase(), pcName
-        );
+        const abdChanges = [
+            computeABDMasterConfigChange(abdContent, airport.toUpperCase(), airline.toUpperCase(), pcName),
+            accessibility ? computeABDAccessibilityChange(abdContent) : null,
+            accessibility ? computeABDAccessibilityChange(abdContent, pcName) : null,
+        ].filter((change): change is ABDMasterConfigChange => change !== null);
         // Look up the config-supplied default kiosk ID for this keyword (case-insensitive)
         const configKioskId = keywordKioskIds[keyword] ?? keywordKioskIds[keyword.toUpperCase()] ?? undefined;
         const alChange = await computeAlAppConfigChange(
             alEntries, airport.toUpperCase(), airline.toUpperCase(), pcName, keyword, usedPorts, configKioskId
         );
 
-        if (!abdChange && !alChange) {
+        if (abdChanges.length === 0 && !alChange) {
             console.log(`   ℹ️  Nothing to change for ${pcName}.`);
             continue;
         }
@@ -204,20 +212,21 @@ if (answer.toLowerCase() !== 'y' && answer.toLowerCase() !== 'yes') {
         // ── Build combined diff content ───────────────────────────────────────
         const lines: string[] = [];
 
-        if (abdChange) {
+        for (const abdChange of abdChanges) {
             lines.push(
                 sep,
-                `  [ABDMasterConfig] BEFORE — DEFAULT block for ${pcName}:`,
+            `  [ABDMasterConfig] BEFORE — DEFAULT block for ${abdChange.pcName}:`,
                 sep,
                 abdChange.originalBlock,
                 '',
                 sep,
-                `  [ABDMasterConfig] AFTER  — DEFAULT block for ${pcName}:`,
+                `  [ABDMasterConfig] AFTER  — DEFAULT block for ${abdChange.pcName}:`,
                 sep,
                 abdChange.updatedBlock,
                 sep,
             );
-        } else {
+        }
+        if (abdChanges.length === 0) {
             lines.push(sep, `  [ABDMasterConfig] No changes required for ${pcName}.`, sep);
         }
 
@@ -259,11 +268,11 @@ if (answer.toLowerCase() !== 'y' && answer.toLowerCase() !== 'yes') {
         }
 
         // ── Apply ─────────────────────────────────────────────────────────────
-        if (abdChange) {
+        for (const abdChange of abdChanges.sort((left, right) => right.firstAbdConfigIdx - left.firstAbdConfigIdx)) {
             // Step 2 — ABDMasterConfig.cfg update (staged in-memory)
             abdContent  = applyABDMasterConfigChange(abdContent, abdChange);
             abdModified = true;
-            console.log(`   ✅ ABDMasterConfig change staged for ${pcName}.`);
+            console.log(`   ✅ ABDMasterConfig change staged for ${abdChange.pcName}.`);
         }
         if (alChange) {
             // Step 3 — AlAppConfig.json update + CussConnector folder provisioning
@@ -280,16 +289,16 @@ if (answer.toLowerCase() !== 'y' && answer.toLowerCase() !== 'yes') {
     }
 
     // ── Final save: persist only files with staged changes ────────────────────
-    console.log(`\n💾 abdModified=${abdModified}  alModified=${alModified}`);
+    console.log(`\n💾 Changes done in ABDMasterConfig = ${abdModified}  AlAppConfig = ${alModified}`);
 
     if (abdModified) saveABDMasterConfig(abdContent);
-    else console.log('ℹ️  No changes required in ABDMasterConfig.');
+    else console.log('ℹ️  No changes done in ABDMasterConfig.');
 
     if (alModified) {
         console.log(`💾 Writing AlAppConfig.json (${alEntries.length} entries)...`);
         saveAlAppConfig(alEntries);
     } else {
-        console.log('ℹ️  No changes required in AlAppConfig.json.');
+        console.log('ℹ️  No changes done in AlAppConfig.json.');
     }
 
     console.log('');

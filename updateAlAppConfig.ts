@@ -285,15 +285,15 @@ export async function computeAlAppConfigChange(
     // If a default is provided via config, show it; otherwise fall back to derived pattern
     const derivedDefault = `${airport.toUpperCase()}${terminalNum}ABD01`;
     const effectiveDefault = defaultKioskId ?? derivedDefault;
-    const kioskInput   = await prompt(`   Enter KioskID URL suffix (d = default: ${effectiveDefault}): `);
-    const kioskId      = (kioskInput.trim() === '' || kioskInput.trim().toLowerCase() === 'd')
+    const kioskInput   = await prompt(`   Enter KioskID or press ENTER to go with default (default: ${effectiveDefault}): `);
+    const kioskId      = (kioskInput.trim() === '')
         ? effectiveDefault
         : kioskInput.trim();
 
-    // Prompt: base URL — Enter or "d" = use default from paths.config
-    const baseUrlInput = await prompt(`   Enter base URL (d = default: ${DEFAULT_BASE_URL}): `);
+    // Prompt: Enter base URL or use default from paths.config
+    const baseUrlInput = await prompt(`   Enter BASE url or press ENTER to go with default (default: ${DEFAULT_BASE_URL}): `);
     const baseUrlRaw   = baseUrlInput.trim();
-    const baseUrl      = (baseUrlRaw === '' || baseUrlRaw.toLowerCase() === 'd')
+    const baseUrl      = (baseUrlRaw === '')
         ? DEFAULT_BASE_URL
         : baseUrlRaw;
 

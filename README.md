@@ -58,12 +58,21 @@ npx ts-node setupEnv.ts --airport=<IATA> --airline=<CODE>
 |---|---|---|
 | `--airport` | Yes | IATA airport code (e.g. `SYD`, `LHR`, `DXB`) |
 | `--airline` | Yes | Airline code to configure (e.g. `QF`, `EK`) |
+| `--accessibility` | No | Set to `true` to enable accessibility in `ComputerName="ABD-DEFAULT"`; omitted or `false` leaves accessibility unchanged. |
 
 ### Example
 
 ```bash
 npx ts-node setupEnv.ts --airport=PER --airline=QR
 ```
+
+To enable accessibility, pass it as the first option:
+
+```bash
+npx ts-node setupEnv.ts --accessibility=true --airport=WSI --airline=SQ
+```
+
+This adds or updates `TextToSpeech` (`Disable="false"`, `VolumeLevel="50"`, `VoiceGenderDeviceHelp="female"`, `SpeechRate="0"`) and `NavigationPad` (`Disable="false"`, `NavigationPadModel="Navbar"`, `UseDeviceSimulator="true"`, `IsDedicatedtoAccessible="true"`) under `<ABDConfig ComputerName="ABD-DEFAULT">`. Existing accessibility elements in the selected simulator block are also updated with these values so they do not override the global settings. Missing simulator elements are not added. Airport-default and other simulator accessibility settings are left unchanged. Accessibility does not change `AlAppConfig.json`; existing setup steps and confirmation still apply.
 
 Set `SIMULATOR_PATH` in `paths.config.ts` to the simulator executable. The tool starts the simulator with Administrator privileges if it is not already running.
 

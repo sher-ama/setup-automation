@@ -19,7 +19,7 @@ export const CUSS_CONNECTOR_ROOT = 'C:\\Cussconnector';
 export const CUSS_USERS_ROOT = 'C:\\CUSSUsers';
 
 /** Name of the template folder inside CUSS_CONNECTOR_ROOT used to create new airport folders. */
-export const CUSS_CONNECTOR_TEMPLATE_FOLDER = 'Airline1 - Copy';
+export const CUSS_CONNECTOR_TEMPLATE_FOLDER = 'Airline';
 
 /** Full path to the Chrome executable. */
 export const CHROME_EXE = 'C:\\cussusers\\Chrome-bin119\\chrome.exe';
